@@ -1,25 +1,174 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.11.35327.3
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ödev", "ödev\ödev.csproj", "{E04FAE1F-D088-4EDB-B2A9-D09A16544041}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E04FAE1F-D088-4EDB-B2A9-D09A16544041}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E04FAE1F-D088-4EDB-B2A9-D09A16544041}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E04FAE1F-D088-4EDB-B2A9-D09A16544041}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E04FAE1F-D088-4EDB-B2A9-D09A16544041}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {47A0AE02-E33D-4218-A1B8-84C40F0471F4}
-	EndGlobalSection
-EndGlobal
+using System;
+using System.Collections.Generic;
+
+class Program
+{
+    public class Vehicle
+    {
+        public string Plate { get; set; }
+        public string Type { get; set; } // "Araba" veya "Kamyonet"
+        public decimal Price { get; set; }
+
+        public Vehicle(string plate, string type, decimal price)
+        {
+            Plate = plate;
+            Type = type;
+            Price = price;
+        }
+    }
+
+    public class RentalSystem
+    {
+        private List<Vehicle> vehicles = new List<Vehicle>();
+        private int totalVehiclesSold = 0;
+        private int totalVehiclesRented = 0;
+
+        public void AddVehicle(string plate, string type, decimal price)
+        {
+            vehicles.Add(new Vehicle(plate, type, price));
+            Console.WriteLine($"Araç eklendi: {plate} - {type} - {price} TL");
+        }
+
+        public void RemoveVehicle(string plate)
+        {
+            var vehicle = vehicles.Find(v => v.Plate == plate);
+            if (vehicle != null)
+            {
+                vehicles.Remove(vehicle);
+                Console.WriteLine($"Araç silindi: {plate}");
+            }
+            else
+            {
+                Console.WriteLine("Araç bulunamadı.");
+            }
+        }
+
+        public void ListVehicles()
+        {
+            Console.WriteLine("Araç Listesi:");
+            if (vehicles.Count == 0)
+            {
+                Console.WriteLine("Listelenecek araç yok.");
+            }
+            else
+            {
+                foreach (var vehicle in vehicles)
+                {
+                    Console.WriteLine($"{vehicle.Plate} - {vehicle.Type} - {vehicle.Price} TL");
+                }
+            }
+        }
+
+        public void SellVehicle(string plate)
+        {
+            var vehicle = vehicles.Find(v => v.Plate == plate);
+            if (vehicle != null)
+            {
+                totalVehiclesSold++;
+                decimal discountPercentage = totalVehiclesSold switch
+                {
+                    1 => 40,
+                    2 => 60,
+                    3 => 80,
+                    _ => 0
+                };
+
+                decimal discount = vehicle.Price * discountPercentage / 100;
+                decimal finalPrice = vehicle.Price - discount;
+                Console.WriteLine($"Araç Satışı: {vehicle.Plate} - İndirim: {discount} TL - Satış Tutarı: {finalPrice} TL");
+            }
+            else
+            {
+                Console.WriteLine("Araç bulunamadı.");
+            }
+        }
+
+        public void RentVehicle(string plate, int rentalDays)
+        {
+            var vehicle = vehicles.Find(v => v.Plate == plate);
+            if (vehicle != null)
+            {
+                totalVehiclesRented++;
+                decimal discountPercentage = totalVehiclesRented switch
+                {
+                    1 => 40,
+                    2 => 60,
+                    _ => 0
+                };
+
+                decimal totalRentalPrice = vehicle.Price * rentalDays;
+                decimal discount = totalRentalPrice * discountPercentage / 100;
+                decimal finalPrice = totalRentalPrice - discount;
+                Console.WriteLine($"Araç Kiralama: {vehicle.Plate} - Kiralama Süresi: {rentalDays} gün - İndirim: {discount} TL - Toplam Tutar: {finalPrice} TL");
+            }
+            else
+            {
+                Console.WriteLine("Araç bulunamadı.");
+            }
+        }
+    }
+
+    static void Main(string[] args)
+    {
+        RentalSystem rentalSystem = new RentalSystem();
+        bool exit = false;
+
+        while (!exit)
+        {
+            Console.WriteLine("\nAraç Yönetim Sistemi");
+            Console.WriteLine("1. Araç Ekle");
+            Console.WriteLine("2. Araç Sil");
+            Console.WriteLine("3. Araç Listele");
+            Console.WriteLine("4. Araç Satın Al");
+            Console.WriteLine("5. Araç Kirala");
+            Console.WriteLine("6. Çıkış");
+            Console.Write("Seçiminizi yapın (1-6): ");
+            string choice = Console.ReadLine();
+
+            switch (choice)
+            {
+                case "1":
+                    Console.Write("Araç Plakası: ");
+                    string plate = Console.ReadLine();
+                    Console.Write("Araç Türü (Araba/Kamyonet): ");
+                    string type = Console.ReadLine();
+                    Console.Write("Araç Fiyatı: ");
+                    decimal price = Convert.ToDecimal(Console.ReadLine());
+                    rentalSystem.AddVehicle(plate, type, price);
+                    break;
+
+                case "2":
+                    Console.Write("Silinecek Araç Plakası: ");
+                    string plateToRemove = Console.ReadLine();
+                    rentalSystem.RemoveVehicle(plateToRemove);
+                    break;
+
+                case "3":
+                    rentalSystem.ListVehicles();
+                    break;
+
+                case "4":
+                    Console.Write("Satın Alınacak Araç Plakası: ");
+                    string plateToSell = Console.ReadLine();
+                    rentalSystem.SellVehicle(plateToSell);
+                    break;
+
+                case "5":
+                    Console.Write("Kiralamak İstediğiniz Araç Plakası: ");
+                    string plateToRent = Console.ReadLine();
+                    Console.Write("Kiralama Süresi (gün): ");
+                    int rentalDays = Convert.ToInt32(Console.ReadLine());
+                    rentalSystem.RentVehicle(plateToRent, rentalDays);
+                    break;
+
+                case "6":
+                    exit = true;
+                    break;
+
+                default:
+                    Console.WriteLine("Geçersiz seçim. Lütfen tekrar deneyin.");
+                    break;
+            }
+        }
+    }
+}
